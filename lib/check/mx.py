@@ -1,0 +1,24 @@
+from libprobe.asset import Asset
+from ..dns_query import dns_query
+from ..utils import get_state, check_config_field
+
+
+def on_item(itm: dict) -> dict:
+    preference, address = itm['data'].split(' ')
+    return {
+        'name': address,
+        'address': address,
+        'preference': int(preference),
+        'ttl': int(itm['ttl']),
+    }
+
+
+async def check_mx(
+        asset: Asset,
+        asset_config: dict,
+        check_config: dict) -> dict:
+    check_config_field(check_config, 'fqdn')
+    fqdn = check_config.get('fqdn', None)
+    name_servers = check_config.get('nameServers', None)
+    rows, measurement_time = await dns_query(fqdn, 'mx', name_servers)
+    return get_state('mx', rows, measurement_time, on_item)
