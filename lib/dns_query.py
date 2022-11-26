@@ -38,8 +38,6 @@ async def dns_query(qname: str, query_type: str, name_servers: list):
         a = await aresolver.resolve(qname, query_type)
     except NoAnswer:
         raise IgnoreResultException
-    except Exception:
-        raise
 
     measurement_time = asyncio.get_event_loop().time() - start
     response = to_dict(a.response)

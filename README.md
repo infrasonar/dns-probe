@@ -19,4 +19,3 @@ Variable          | Default                        | Description
 ```
 docker build -t dns-probe . --no-cache
 ```
-# dns-probe
