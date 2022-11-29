@@ -23,3 +23,6 @@ jobs:
       - name: Lint with PyCodeStyle
         run: |
           find . -name \*.py -exec pycodestyle {} +
+      - name: Pytest
+        run: |
+          pytest
