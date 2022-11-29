@@ -13,9 +13,9 @@ from libprobe.exceptions import (
 )
 
 
-def get_item(measured_time: float, answers: int, item: dict) -> dict:
+def get_item(timeit: float, answers: int, item: dict) -> dict:
     item['answers'] = answers
-    item['measuredTime'] = measured_time
+    item['timeit'] = timeit
     return item
 
 

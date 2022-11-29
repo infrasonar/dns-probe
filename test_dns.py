@@ -24,7 +24,7 @@ class TestProbe(unittest.TestCase):
         self.assertNotIn('A', res[0])
         self.assertEqual(1, res[0]['answers'])
         self.assertEqual(res[0]['query'], 'www.cesbit.com')
-        self.assertIsInstance(res[0]['measuredTime'], float)
+        self.assertIsInstance(res[0]['timeit'], float)
         self.assertIsInstance(res[0]['answers'], int)
 
     def test_check_dns_ptr(self):
