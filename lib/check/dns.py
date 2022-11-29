@@ -87,7 +87,8 @@ async def check_dns(
     name_servers = check_config.get('nameServers')
     if not name_servers or not isinstance(name_servers, (tuple, list)):
         logging.warning(
-            f'Check did not run; {field} is not provided, invalid or empty')
+            'Check did not run; '
+            'nameServers is not provided, invalid or empty')
         raise IgnoreCheckException
 
     query = check_config.get('fqdn')
