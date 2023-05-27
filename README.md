@@ -3,6 +3,8 @@
 
 # InfraSonar DNS Probe
 
+Documentation: https://docs.infrasonar.com/collectors/probes/dns/
+
 ## Environment variable
 
 Variable            | Default                        | Description
