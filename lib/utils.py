@@ -12,11 +12,6 @@ from libprobe.exceptions import (
 )
 
 
-def get_item(timeit: float, answers: int, item: dict) -> dict:
-    item['timeit'] = timeit
-    return item
-
-
 async def _time_dns(loop, aresolver, qname, qtype, item,
                     single) -> Optional[dict]:
     start = loop.time()
