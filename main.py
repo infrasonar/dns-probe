@@ -16,18 +16,18 @@ from lib.version import __version__ as version
 
 if __name__ == '__main__':
     checks = {
-        'a': check_a,
-        'aaaa': check_aaaa,
-        'caa': check_caa,
-        'cname': check_cname,
+        'A': check_a,
+        'AAAA': check_aaaa,
+        'CAA': check_caa,
+        'CNAME': check_cname,
         'dns': check_dns,
-        'ds': check_ds,
-        'mx': check_mx,
-        'ns': check_ns,
-        'ptr': check_ptr,
-        'soa': check_soa,
-        'srv': check_srv,
-        'txt': check_txt,
+        'DS': check_ds,
+        'MX': check_mx,
+        'NS': check_ns,
+        'PTR': check_ptr,
+        'SOA': check_soa,
+        'SRV': check_srv,
+        'TXT': check_txt,
     }
 
     probe = Probe("dns", version, checks)

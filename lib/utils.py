@@ -17,7 +17,8 @@ def get_item(timeit: float, answers: int, item: dict) -> dict:
     return item
 
 
-async def dns_single(loop, aresolver, qname, qtype, item) -> Optional[dict]:
+async def _time_dns(loop, aresolver, qname, qtype, item,
+                    single) -> Optional[dict]:
     start = loop.time()
     try:
         response = (await aresolver.resolve(qname, qtype)).response
@@ -27,12 +28,16 @@ async def dns_single(loop, aresolver, qname, qtype, item) -> Optional[dict]:
         msg = str(e) or type(e).__name__
         raise CheckException(msg)  # this might result in a incomplete result
     else:
-        record = response.answer[0].to_rdataset()[0]
-        item[qtype] = str(record)
+        if single:
+            record = response.answer[0].to_rdataset()[0]
+            item['record'] = str(record)
+        else:
+            records = response.answer[0].to_rdataset()
+            item['records'] = sorted(map(str, records))
         item['timeit'] = loop.time() - start
 
 
-async def dns_query(qname: str, qtype: str, name_server: str):
+async def _dns_query(qname: str, qtype: str, name_server: str, single: bool):
     aresolver = dns.asyncresolver.Resolver()
     try:
         aresolver.nameservers = [name_server]
@@ -44,7 +49,7 @@ async def dns_query(qname: str, qtype: str, name_server: str):
         'name': name_server,
         'query': qname,
     }
-    await dns_single(loop, aresolver, qname, qtype, item)
+    await _time_dns(loop, aresolver, qname, qtype, item, single)
     return item
 
 
@@ -52,7 +57,8 @@ async def dns_check(
         asset: Asset,
         asset_config: dict,
         check_config: dict,
-        qtype: str) -> dict:
+        qtype: str,
+        single: bool) -> dict:
     name_servers = check_config.get('nameServers')
     if not name_servers or not isinstance(name_servers, (tuple, list)):
         logging.warning(
@@ -64,14 +70,12 @@ async def dns_check(
     if not qname:
         qname = asset.name
 
-    type_name = qtype.lower()
-
     items = []
-    result = {type_name: items}
+    result = {qtype: items}
     check_exc: Optional[CheckException] = None
     for name_server in name_servers:
         try:
-            item = await dns_query(qname, qtype, name_server)
+            item = await _dns_query(qname, qtype, name_server, single)
         except CheckException as e:
             check_exc = e
         else:

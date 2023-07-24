@@ -9,5 +9,5 @@ async def check_txt(
         asset: Asset,
         asset_config: dict,
         check_config: dict) -> dict:
-    res = await dns_check(asset, asset_config, check_config, QTYPE)
+    res = await dns_check(asset, asset_config, check_config, QTYPE, False)
     return res
