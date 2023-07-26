@@ -62,7 +62,10 @@ class TestProbe(unittest.TestCase):
         except IncompleteResultException as e:
             result = e.result
             self.assertIn('CNAME', result['dns'][0])
-            self.assertRegex(str(e), r'nameserver 0.0 is not an IP address')
+            self.assertRegex(
+                str(e),
+                r'nameserver 0.0 is not a dns.nameserver.Nameserver '
+                r'instance or text form, IP address, nor a valid https URL')
         else:
             raise Exception('IncompleteResultException not raised')
 
