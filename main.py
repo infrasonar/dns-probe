@@ -3,7 +3,6 @@ from lib.check.a import check_a
 from lib.check.aaaa import check_aaaa
 from lib.check.caa import check_caa
 from lib.check.cname import check_cname
-from lib.check.dns import check_dns
 from lib.check.ds import check_ds
 from lib.check.mx import check_mx
 from lib.check.ns import check_ns
@@ -20,7 +19,6 @@ if __name__ == '__main__':
         'AAAA': check_aaaa,
         'CAA': check_caa,
         'CNAME': check_cname,
-        'dns': check_dns,
         'DS': check_ds,
         'MX': check_mx,
         'NS': check_ns,
