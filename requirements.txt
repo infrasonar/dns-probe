@@ -1,2 +1,2 @@
-libprobe==0.2.33
-dnspython==2.4.2
+libprobe==0.2.36
+dnspython==2.6.1
