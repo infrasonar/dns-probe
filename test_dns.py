@@ -24,7 +24,7 @@ class TestProbe(unittest.TestCase):
         res = _run('www.cesbit.com', check=check_cname)
         self.assertIn(q, res)
         self.assertEqual(len(res[q]), 1)
-        self.assertEqual(res[q][0]['record'], 'cesbit.com.')
+        self.assertEqual(res[q][0]['record'], 'ext-cust.squarespace.com.')
         self.assertIsInstance(res[q][0]['timeit'], float)
 
     def test_check_dns_multi(self):
