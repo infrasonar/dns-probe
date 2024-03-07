@@ -28,7 +28,7 @@ async def _time_dns(loop, aresolver, qname, qtype, item,
             item['record'] = str(record)
         else:
             records = response.answer[0].to_rdataset()
-            item['records'] = sorted(map(str, records))
+            item['records'] = list(map(str, records))
         item['timeit'] = loop.time() - start
 
 
