@@ -33,7 +33,7 @@ async def _time_dns(loop, aresolver, qname, qtype, item,
 
 
 async def _dns_query(qname: str, qtype: str, name_server: str, single: bool):
-    aresolver = dns.asyncresolver.Resolver()
+    aresolver = dns.asyncresolver.Resolver(configure=False)
     try:
         aresolver.nameservers = [name_server]
     except ValueError as e:
