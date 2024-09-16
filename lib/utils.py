@@ -39,7 +39,7 @@ async def _dns_query(qname: str, qtype: str, name_server: str, single: bool):
     except ValueError as e:
         raise CheckException(str(e))
 
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     item = {
         'name': name_server,
         'query': qname,
