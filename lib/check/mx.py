@@ -1,13 +1,15 @@
 from libprobe.asset import Asset
+from libprobe.check import Check
 from ..utils import dns_check
 
 
 QTYPE = 'MX'
 
 
-async def check_mx(
-        asset: Asset,
-        asset_config: dict,
-        check_config: dict) -> dict:
-    res = await dns_check(asset, asset_config, check_config, QTYPE, False)
-    return res
+class CheckMX(Check):
+    key = 'MX'
+
+    @staticmethod
+    async def run(asset: Asset, local_config: dict, config: dict) -> dict:
+        res = await dns_check(asset, local_config, config, QTYPE, False)
+        return res

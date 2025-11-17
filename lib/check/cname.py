@@ -1,13 +1,15 @@
 from libprobe.asset import Asset
+from libprobe.check import Check
 from ..utils import dns_check
 
 
 QTYPE = 'CNAME'
 
 
-async def check_cname(
-        asset: Asset,
-        asset_config: dict,
-        check_config: dict) -> dict:
-    res = await dns_check(asset, asset_config, check_config, QTYPE, True)
-    return res
+class CheckCNAME(Check):
+    key = 'CNAME'
+
+    @staticmethod
+    async def run(asset: Asset, local_config: dict, config: dict) -> dict:
+        res = await dns_check(asset, local_config, config, QTYPE, True)
+        return res

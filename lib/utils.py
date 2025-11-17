@@ -50,18 +50,18 @@ async def _dns_query(qname: str, qtype: str, name_server: str, single: bool):
 
 async def dns_check(
         asset: Asset,
-        asset_config: dict,
-        check_config: dict,
+        local_config: dict,
+        config: dict,
         qtype: str,
         single: bool) -> dict:
-    name_servers = check_config.get('nameServers')
+    name_servers = config.get('nameServers')
     if not name_servers or not isinstance(name_servers, (tuple, list)):
         logging.warning(
             'Check did not run; '
             'nameServers is not provided, invalid or empty')
         raise IgnoreCheckException
 
-    qname = check_config.get('fqdn')
+    qname = config.get('fqdn')
     if not qname:
         qname = asset.name
 
