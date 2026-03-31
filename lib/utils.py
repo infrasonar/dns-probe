@@ -69,6 +69,8 @@ async def _dns_query(qname: str, qtype: str, name_server: str, single: bool):
     # CD = Checking Disabled (ignore check, receive even if not valid)
     # AD = Authenticated Data (include to see if valid according nameserver)
     aresolver.set_flags(flags.RD | flags.CD | flags.AD)
+
+    # DO = DNSSEC OK (required to receive RRSIG)
     aresolver.use_edns(0, ednsflags=flags.DO)
 
     loop = asyncio.get_running_loop()
