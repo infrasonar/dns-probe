@@ -36,7 +36,6 @@ async def _time_dns(loop: asyncio.AbstractEventLoop,
                 frecord = rrset[0]
                 if isinstance(frecord, RRSIG):
                     rrsig = frecord
-                    break
             else:
                 answer = rrset
 
