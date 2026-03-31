@@ -40,7 +40,9 @@ async def _time_dns(loop: asyncio.AbstractEventLoop,
             now = time.time()
             item['rrsig_inception'] = rrsig.inception
             item['rrsig_expiration'] = rrsig.expiration
-            item['rrsig_is_valid'] = rrsig.inception <= now <= rrsig.expiration
+            # flags AD is set in response when accepted by nameserver
+            item['rrsig_is_valid'] = bool(response.flags & flags.AD)
+
             item['dnssec_enabled'] = True
         else:
             item['dnssec_enabled'] = False
@@ -63,6 +65,10 @@ async def _dns_query(qname: str, qtype: str, name_server: str, single: bool):
     except ValueError as e:
         raise CheckException(str(e))
 
+    # RD = Recursion Desired (default)
+    # CD = Checking Disabled (ignore check, receive even if not valid)
+    # AD = Authenticated Data (include to see if valid according nameserver)
+    aresolver.set_flags(flags.RD | flags.CD | flags.AD)
     aresolver.use_edns(0, ednsflags=flags.DO)
 
     loop = asyncio.get_running_loop()
