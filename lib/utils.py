@@ -1,10 +1,11 @@
 import logging
 import time
-from typing import Optional, Any
+from typing import Any
 from libprobe.asset import Asset
 import asyncio
 from dns import rdatatype, asyncresolver, flags
 from dns.rdtypes.ANY.RRSIG import RRSIG
+from dns.rrset import RRset
 from dns.resolver import NoAnswer
 from libprobe.exceptions import (
     CheckException,
@@ -18,7 +19,7 @@ async def _time_dns(loop: asyncio.AbstractEventLoop,
                     qname: str,
                     qtype: str,
                     item: dict[str, Any],
-                    single: bool) -> Optional[dict]:
+                    single: bool) -> dict | None:
     start = loop.time()
     try:
         response = (await aresolver.resolve(qname, qtype)).response
@@ -29,13 +30,17 @@ async def _time_dns(loop: asyncio.AbstractEventLoop,
         raise CheckException(msg)  # this might result in a incomplete result
     else:
         rrsig: RRSIG | None = None
+        answer: RRset | None = None
         for rrset in response.answer:
             if rrset.rdtype == rdatatype.RRSIG:
                 frecord = rrset[0]
                 if isinstance(frecord, RRSIG):
                     rrsig = frecord
                     break
+            else:
+                answer = rrset
 
+        assert answer, 'missing answer'
         if rrsig:
             now = time.time()
             item['rrsig_inception'] = rrsig.inception
@@ -47,10 +52,10 @@ async def _time_dns(loop: asyncio.AbstractEventLoop,
             item['dnssec_enabled'] = False
 
         if single:
-            record = response.answer[0].to_rdataset()[0]
+            record = answer.to_rdataset()[0]
             item['record'] = str(record)
         else:
-            records = response.answer[0].to_rdataset()
+            records = answer.to_rdataset()
             item['records'] = sorted(map(str, records))
 
         item['timeit'] = loop.time() - start
@@ -102,7 +107,7 @@ async def dns_check(
 
     items = []
     result = {qtype: items}
-    check_exc: Optional[CheckException] = None
+    check_exc: CheckException | None = None
     for name_server in name_servers:
         try:
             item = await _dns_query(qname, qtype, name_server, single)
