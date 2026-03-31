@@ -1,9 +1,10 @@
 import logging
-from typing import Optional
+import time
+from typing import Optional, Any
 from libprobe.asset import Asset
 import asyncio
-import dns.asyncresolver
-import dns.message
+from dns import rdatatype, asyncresolver
+from dns.rdtypes.ANY.RRSIG import RRSIG
 from dns.resolver import NoAnswer
 from libprobe.exceptions import (
     CheckException,
@@ -12,8 +13,12 @@ from libprobe.exceptions import (
 )
 
 
-async def _time_dns(loop, aresolver, qname, qtype, item,
-                    single) -> Optional[dict]:
+async def _time_dns(loop: asyncio.AbstractEventLoop,
+                    aresolver: asyncresolver.Resolver,
+                    qname: str,
+                    qtype: str,
+                    item: dict[str, Any],
+                    single: bool) -> Optional[dict]:
     start = loop.time()
     try:
         response = (await aresolver.resolve(qname, qtype)).response
@@ -23,17 +28,36 @@ async def _time_dns(loop, aresolver, qname, qtype, item,
         msg = str(e) or type(e).__name__
         raise CheckException(msg)  # this might result in a incomplete result
     else:
+        rrsig: RRSIG | None = None
+        for rrset in response.answer:
+            if rrset.rdtype == rdatatype.RRSIG:
+                frecord = rrset[0]
+                if isinstance(frecord, RRSIG):
+                    rrsig = frecord
+                    break
+
+        if rrsig:
+            now = time.time()
+            item['rrsig_inception'] = rrsig.inception
+            item['rrsig_expiration'] = rrsig.expiration
+            item['rrsig_is_valid'] = rrsig.inception <= now <= rrsig.expiration
+            item['dnssec_enabled'] = True
+        else:
+            item['dnssec_enabled'] = False
+
         if single:
             record = response.answer[0].to_rdataset()[0]
             item['record'] = str(record)
         else:
             records = response.answer[0].to_rdataset()
             item['records'] = sorted(map(str, records))
+
         item['timeit'] = loop.time() - start
 
 
 async def _dns_query(qname: str, qtype: str, name_server: str, single: bool):
-    aresolver = dns.asyncresolver.Resolver()
+    aresolver = asyncresolver.Resolver()
+
     try:
         aresolver.nameservers = [name_server]
     except ValueError as e:
