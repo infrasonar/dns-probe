@@ -77,6 +77,7 @@ async def _dns_query(qname: str, qtype: str, name_server: str, single: bool):
     item = {
         'name': name_server,
         'query': qname,
+        'dnssec_enabled': False,
     }
     await _time_dns(loop, aresolver, qname, qtype, item, single)
     return item
