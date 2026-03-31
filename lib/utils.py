@@ -3,7 +3,7 @@ import time
 from typing import Optional, Any
 from libprobe.asset import Asset
 import asyncio
-from dns import rdatatype, asyncresolver
+from dns import rdatatype, asyncresolver, flags
 from dns.rdtypes.ANY.RRSIG import RRSIG
 from dns.resolver import NoAnswer
 from libprobe.exceptions import (
@@ -62,6 +62,8 @@ async def _dns_query(qname: str, qtype: str, name_server: str, single: bool):
         aresolver.nameservers = [name_server]
     except ValueError as e:
         raise CheckException(str(e))
+
+    aresolver.use_edns(0, ednsflags=flags.DO)
 
     loop = asyncio.get_running_loop()
     item = {
