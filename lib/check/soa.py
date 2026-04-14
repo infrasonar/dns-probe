@@ -1,13 +1,14 @@
 from libprobe.asset import Asset
 from libprobe.check import Check
+from dns import rdatatype
 from ..utils import dns_check
 
 
-QTYPE = 'SOA'
+QTYPE = rdatatype.SOA
 
 
 class CheckSOA(Check):
-    key = 'SOA'
+    key = QTYPE.name
 
     @staticmethod
     async def run(asset: Asset, local_config: dict, config: dict) -> dict:

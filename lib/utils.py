@@ -5,6 +5,7 @@ from libprobe.asset import Asset
 import asyncio
 from dns import rdatatype, asyncresolver, flags
 from dns.rdtypes.ANY.RRSIG import RRSIG
+from dns.rdatatype import RdataType
 from dns.rrset import RRset
 from dns.resolver import NoAnswer
 from libprobe.exceptions import (
@@ -17,7 +18,7 @@ from libprobe.exceptions import (
 async def _time_dns(loop: asyncio.AbstractEventLoop,
                     aresolver: asyncresolver.Resolver,
                     qname: str,
-                    qtype: str,
+                    qtype: RdataType,
                     item: dict[str, Any],
                     single: bool) -> dict | None:
     start = loop.time()
@@ -36,14 +37,18 @@ async def _time_dns(loop: asyncio.AbstractEventLoop,
                 frecord = rrset[0]
                 if isinstance(frecord, RRSIG):
                     rrsig = frecord
-            else:
+            elif rrset.rdtype == qtype:
                 answer = rrset
 
-        assert answer, 'missing answer'
+        if answer is None:
+            raise CheckException(f'missing {qtype.name} answer in response')
+
         if rrsig:
             now = time.time()
+            exp = (now-rrsig.inception) / (rrsig.expiration-rrsig.inception)
             item['rrsig_inception'] = rrsig.inception
             item['rrsig_expiration'] = rrsig.expiration
+            item['rrsig_expiry_progress'] = min(1.0, max(0.0, exp))
             item['rrsig_is_valid'] = rrsig.inception <= now <= rrsig.expiration
 
             item['dnssec_enabled'] = True
@@ -60,7 +65,8 @@ async def _time_dns(loop: asyncio.AbstractEventLoop,
         item['timeit'] = loop.time() - start
 
 
-async def _dns_query(qname: str, qtype: str, name_server: str, single: bool):
+async def _dns_query(qname: str, qtype: RdataType, name_server: str,
+                     single: bool):
     aresolver = asyncresolver.Resolver()
 
     try:
@@ -91,7 +97,7 @@ async def dns_check(
         asset: Asset,
         local_config: dict,
         config: dict,
-        qtype: str,
+        qtype: RdataType,
         single: bool) -> dict:
     name_servers = config.get('nameServers')
     if not name_servers or not isinstance(name_servers, (tuple, list)):
@@ -105,7 +111,7 @@ async def dns_check(
         qname = asset.name
 
     items = []
-    result = {qtype: items}
+    result = {qtype.name: items}
     check_exc: CheckException | None = None
     for name_server in name_servers:
         try:
